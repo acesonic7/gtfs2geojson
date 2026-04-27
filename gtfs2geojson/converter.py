@@ -271,6 +271,16 @@ def convert(
                 file=sys.stderr,
             )
 
+    # ── Agencies (read first so the sole-agency fallback below works) ────
+    # GTFS allows routes.agency_id to be omitted when the feed has exactly
+    # one agency; in that case the route implicitly belongs to it.
+    agency_name_by_id: dict[str, str] = {}
+    for a in _read_csv(source, "agency.txt"):
+        aid = a.get("agency_id", "")
+        if aid:
+            agency_name_by_id[aid] = a.get("agency_name", "")
+    sole_agency_id = next(iter(agency_name_by_id)) if len(agency_name_by_id) == 1 else None
+
     # ── Routes ────────────────────────────────────────────────────────────
     routes_raw = _read_csv(source, "routes.txt")
     if not routes_raw:
@@ -288,11 +298,12 @@ def convert(
         mode_label, default_color = ROUTE_TYPE_MAP.get(rt, ("Other", "#616161"))
         if mode_filter and mode_label.lower() not in mode_filter:
             continue
-        if agency_filter and r.get("agency_id", "") not in agency_filter:
+        agency_id = r.get("agency_id", "") or (sole_agency_id or "")
+        if agency_filter and agency_id not in agency_filter:
             continue
         routes[r["route_id"]] = {
             "route_id": r["route_id"],
-            "agency_id": r.get("agency_id", ""),
+            "agency_id": agency_id,
             "route_short_name": r.get("route_short_name", ""),
             "route_long_name": r.get("route_long_name", ""),
             "route_type": rt,
@@ -300,11 +311,6 @@ def convert(
             "route_color": _normalise_colour(r.get("route_color", ""), default_color),
             "route_text_color": _normalise_colour(r.get("route_text_color", ""), "#FFFFFF"),
         }
-
-    # Agency lookup for nicer attribution
-    agency_name_by_id: dict[str, str] = {}
-    for a in _read_csv(source, "agency.txt"):
-        agency_name_by_id[a.get("agency_id", "")] = a.get("agency_name", "")
 
     # ── Shapes ────────────────────────────────────────────────────────────
     shapes_by_id: dict[str, list[tuple[int, float, float]]] = defaultdict(list)
@@ -491,10 +497,80 @@ def convert(
     return {"type": "FeatureCollection", "features": features}
 
 
-def write(geojson: dict, path: str | Path | None) -> None:
-    """Write GeoJSON to disk (or stdout if path is '-' or None)."""
-    text = json.dumps(geojson, ensure_ascii=False)
-    if path in (None, "-"):
-        print(text)
-    else:
+_RS = "\x1e"  # ASCII Record Separator (RFC 8142 / GeoJSON-seq)
+
+
+def write(geojson: dict, path: str | Path | None, *, format: str = "geojson") -> None:
+    """Write a FeatureCollection to disk (or stdout if ``path`` is ``'-'`` / ``None``).
+
+    ``format`` selects the on-disk encoding:
+
+    * ``"geojson"`` (default) — a single ``FeatureCollection`` JSON object.
+    * ``"geojsonseq"`` — RFC 8142 record-separated GeoJSON: each record is one
+      ``Feature`` preceded by ``\\x1e`` and terminated by ``\\n``. Compatible
+      with tippecanoe and ogr2ogr's ``GeoJSONSeq`` driver.
+    """
+    if format == "geojson":
+        text = json.dumps(geojson, ensure_ascii=False)
+        if path in (None, "-"):
+            print(text)
+            return
         Path(path).write_text(text, encoding="utf-8")
+        return
+    if format == "geojsonseq":
+        parts = [
+            f"{_RS}{json.dumps(f, ensure_ascii=False)}\n"
+            for f in geojson.get("features", [])
+        ]
+        text = "".join(parts)
+        if path in (None, "-"):
+            sys.stdout.write(text)  # already ends with \n per record
+            return
+        Path(path).write_text(text, encoding="utf-8")
+        return
+    raise ValueError(f"unknown format: {format!r} (expected 'geojson' or 'geojsonseq')")
+
+
+def list_modes(source: str | Path) -> dict[str, int]:
+    """Return ``{mode_label: route_count}`` for every distinct mode in routes.txt.
+
+    Uses the same ``ROUTE_TYPE_MAP`` collapsing that ``convert()`` does, so e.g.
+    route_types 3, 700, 701, 704 all aggregate under ``"Bus"``.
+    """
+    counts: dict[str, int] = defaultdict(int)
+    for r in _read_csv(source, "routes.txt"):
+        try:
+            rt = int(r.get("route_type", "3"))
+        except ValueError:
+            rt = 3
+        mode_label, _ = ROUTE_TYPE_MAP.get(rt, ("Other", "#616161"))
+        counts[mode_label] += 1
+    return dict(counts)
+
+
+def list_agencies(source: str | Path) -> list[dict]:
+    """Return a list of ``{agency_id, agency_name, n_routes}`` records.
+
+    Routes whose ``agency_id`` is empty are attributed to the sole agency when
+    the feed has exactly one — matching the GTFS spec's implicit fallback.
+    """
+    agencies: dict[str, str] = {}
+    for a in _read_csv(source, "agency.txt"):
+        aid = a.get("agency_id", "")
+        if aid:
+            agencies[aid] = a.get("agency_name", "")
+    sole = next(iter(agencies)) if len(agencies) == 1 else None
+
+    counts: dict[str, int] = defaultdict(int)
+    for r in _read_csv(source, "routes.txt"):
+        aid = r.get("agency_id", "") or (sole or "")
+        counts[aid] += 1
+
+    rows: list[dict] = []
+    for aid in sorted(counts):
+        rows.append({
+            "agency_id": aid,
+            "agency_name": agencies.get(aid, ""),
+            "n_routes": counts[aid],
+        })
+    return rows

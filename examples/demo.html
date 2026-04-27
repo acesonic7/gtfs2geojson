@@ -17,7 +17,7 @@
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-                #map_626b7604dcdceb8199c942dcf56aff8f {
+                #map_06ca368cb1085a4efff95cef59b90ace {
                     position: relative;
                     width: 100.0%;
                     height: 100.0%;
@@ -57,14 +57,14 @@
 <body>
     
     
-            <div class="folium-map" id="map_626b7604dcdceb8199c942dcf56aff8f" ></div>
+            <div class="folium-map" id="map_06ca368cb1085a4efff95cef59b90ace" ></div>
         
 </body>
 <script>
     
     
-            var map_626b7604dcdceb8199c942dcf56aff8f = L.map(
-                "map_626b7604dcdceb8199c942dcf56aff8f",
+            var map_06ca368cb1085a4efff95cef59b90ace = L.map(
+                "map_06ca368cb1085a4efff95cef59b90ace",
                 {
                     center: [37.96155, 23.828400000000002],
                     crs: L.CRS.EPSG3857,
@@ -81,7 +81,7 @@
 
         
     
-            var tile_layer_0a6e0ea1c9d7297b7f07b233a0da7a99 = L.tileLayer(
+            var tile_layer_876143387d717cec6a62767a0ff551d2 = L.tileLayer(
                 "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
                 {
   "minZoom": 0,
@@ -98,50 +98,50 @@
             );
         
     
-            tile_layer_0a6e0ea1c9d7297b7f07b233a0da7a99.addTo(map_626b7604dcdceb8199c942dcf56aff8f);
+            tile_layer_876143387d717cec6a62767a0ff551d2.addTo(map_06ca368cb1085a4efff95cef59b90ace);
         
     
-            map_626b7604dcdceb8199c942dcf56aff8f.fitBounds(
+            map_06ca368cb1085a4efff95cef59b90ace.fitBounds(
                 [[37.925, 23.71], [37.9981, 23.9468]],
                 {}
             );
         
     
-            var feature_group_ddbb8053f1ab9fc1322fa1e88434dcf8 = L.featureGroup(
+            var feature_group_c3f4016a0cb62fb46b832b9f26baa31c = L.featureGroup(
                 {
 }
             );
         
     
-        function geo_json_dbd67f1296394247faabcc7517d284f9_styler(feature) {
+        function geo_json_fd8fbb89c9f327b3cb23a7784d70b95e_styler(feature) {
             switch(feature.properties.route_id) {
                 default:
                     return {"color": "#1976D2", "opacity": 0.85, "weight": 3};
             }
         }
 
-        function geo_json_dbd67f1296394247faabcc7517d284f9_onEachFeature(feature, layer) {
+        function geo_json_fd8fbb89c9f327b3cb23a7784d70b95e_onEachFeature(feature, layer) {
 
             layer.on({
             });
         };
-        var geo_json_dbd67f1296394247faabcc7517d284f9 = L.geoJson(null, {
-                onEachFeature: geo_json_dbd67f1296394247faabcc7517d284f9_onEachFeature,
+        var geo_json_fd8fbb89c9f327b3cb23a7784d70b95e = L.geoJson(null, {
+                onEachFeature: geo_json_fd8fbb89c9f327b3cb23a7784d70b95e_onEachFeature,
             
-                style: geo_json_dbd67f1296394247faabcc7517d284f9_styler,
+                style: geo_json_fd8fbb89c9f327b3cb23a7784d70b95e_styler,
             ...{
 }
         });
 
-        function geo_json_dbd67f1296394247faabcc7517d284f9_add (data) {
-            geo_json_dbd67f1296394247faabcc7517d284f9
+        function geo_json_fd8fbb89c9f327b3cb23a7784d70b95e_add (data) {
+            geo_json_fd8fbb89c9f327b3cb23a7784d70b95e
                 .addData(data);
         }
-            geo_json_dbd67f1296394247faabcc7517d284f9_add({"features": [{"geometry": {"coordinates": [[23.7348, 37.9755], [23.8, 37.97], [23.88, 37.95], [23.9468, 37.9356]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "feature_type": "route", "headsigns": "", "length_km": 19.178, "mode": "Bus", "n_stops": 2, "n_trips": 1, "route_color": "#1976D2", "route_id": "B1", "route_long_name": "Centre - Airport", "route_short_name": "1", "route_text_color": "#FFFFFF", "route_type": 3, "shape_source": "shapes.txt"}, "type": "Feature"}], "type": "FeatureCollection"});
+            geo_json_fd8fbb89c9f327b3cb23a7784d70b95e_add({"features": [{"geometry": {"coordinates": [[23.7348, 37.9755], [23.8, 37.97], [23.88, 37.95], [23.9468, 37.9356]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "feature_type": "route", "headsigns": "", "length_km": 19.178, "mode": "Bus", "n_stops": 2, "n_trips": 1, "route_color": "#1976D2", "route_id": "B1", "route_long_name": "Centre - Airport", "route_short_name": "1", "route_text_color": "#FFFFFF", "route_type": 3, "shape_source": "shapes.txt"}, "type": "Feature"}], "type": "FeatureCollection"});
 
         
     
-            geo_json_dbd67f1296394247faabcc7517d284f9.bindTooltip(
+            geo_json_fd8fbb89c9f327b3cb23a7784d70b95e.bindTooltip(
                 `<div>
                      <b>1</b> Centre - Airport
                  </div>`,
@@ -151,47 +151,47 @@
             );
         
     
-            geo_json_dbd67f1296394247faabcc7517d284f9.addTo(feature_group_ddbb8053f1ab9fc1322fa1e88434dcf8);
+            geo_json_fd8fbb89c9f327b3cb23a7784d70b95e.addTo(feature_group_c3f4016a0cb62fb46b832b9f26baa31c);
         
     
-            feature_group_ddbb8053f1ab9fc1322fa1e88434dcf8.addTo(map_626b7604dcdceb8199c942dcf56aff8f);
+            feature_group_c3f4016a0cb62fb46b832b9f26baa31c.addTo(map_06ca368cb1085a4efff95cef59b90ace);
         
     
-            var feature_group_4abe662b285a480c1dd5df5fb2deb974 = L.featureGroup(
+            var feature_group_b8666a958bcf7c653664bb49dd21e5f0 = L.featureGroup(
                 {
 }
             );
         
     
-        function geo_json_71c3acd95a88e5491abd6253ff5d9f81_styler(feature) {
+        function geo_json_4923f1bdadaca901c75146c207d0a6a8_styler(feature) {
             switch(feature.properties.route_id) {
                 default:
                     return {"color": "#D32F2F", "opacity": 0.85, "weight": 3};
             }
         }
 
-        function geo_json_71c3acd95a88e5491abd6253ff5d9f81_onEachFeature(feature, layer) {
+        function geo_json_4923f1bdadaca901c75146c207d0a6a8_onEachFeature(feature, layer) {
 
             layer.on({
             });
         };
-        var geo_json_71c3acd95a88e5491abd6253ff5d9f81 = L.geoJson(null, {
-                onEachFeature: geo_json_71c3acd95a88e5491abd6253ff5d9f81_onEachFeature,
+        var geo_json_4923f1bdadaca901c75146c207d0a6a8 = L.geoJson(null, {
+                onEachFeature: geo_json_4923f1bdadaca901c75146c207d0a6a8_onEachFeature,
             
-                style: geo_json_71c3acd95a88e5491abd6253ff5d9f81_styler,
+                style: geo_json_4923f1bdadaca901c75146c207d0a6a8_styler,
             ...{
 }
         });
 
-        function geo_json_71c3acd95a88e5491abd6253ff5d9f81_add (data) {
-            geo_json_71c3acd95a88e5491abd6253ff5d9f81
+        function geo_json_4923f1bdadaca901c75146c207d0a6a8_add (data) {
+            geo_json_4923f1bdadaca901c75146c207d0a6a8
                 .addData(data);
         }
-            geo_json_71c3acd95a88e5491abd6253ff5d9f81_add({"features": [{"geometry": {"coordinates": [[23.7348, 37.9755], [23.7338, 37.9876], [23.7411, 37.9981]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "feature_type": "route", "headsigns": "", "length_km": 2.68, "mode": "Metro", "n_stops": 3, "n_trips": 1, "route_color": "#D32F2F", "route_id": "M1", "route_long_name": "Red Line", "route_short_name": "M1", "route_text_color": "#FFFFFF", "route_type": 1, "shape_source": "stop_sequence"}, "type": "Feature"}], "type": "FeatureCollection"});
+            geo_json_4923f1bdadaca901c75146c207d0a6a8_add({"features": [{"geometry": {"coordinates": [[23.7348, 37.9755], [23.7338, 37.9876], [23.7411, 37.9981]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "feature_type": "route", "headsigns": "", "length_km": 2.68, "mode": "Metro", "n_stops": 3, "n_trips": 1, "route_color": "#D32F2F", "route_id": "M1", "route_long_name": "Red Line", "route_short_name": "M1", "route_text_color": "#FFFFFF", "route_type": 1, "shape_source": "stop_sequence"}, "type": "Feature"}], "type": "FeatureCollection"});
 
         
     
-            geo_json_71c3acd95a88e5491abd6253ff5d9f81.bindTooltip(
+            geo_json_4923f1bdadaca901c75146c207d0a6a8.bindTooltip(
                 `<div>
                      <b>M1</b> Red Line
                  </div>`,
@@ -201,47 +201,47 @@
             );
         
     
-            geo_json_71c3acd95a88e5491abd6253ff5d9f81.addTo(feature_group_4abe662b285a480c1dd5df5fb2deb974);
+            geo_json_4923f1bdadaca901c75146c207d0a6a8.addTo(feature_group_b8666a958bcf7c653664bb49dd21e5f0);
         
     
-            feature_group_4abe662b285a480c1dd5df5fb2deb974.addTo(map_626b7604dcdceb8199c942dcf56aff8f);
+            feature_group_b8666a958bcf7c653664bb49dd21e5f0.addTo(map_06ca368cb1085a4efff95cef59b90ace);
         
     
-            var feature_group_5b526be36622847d17a534f37ceb5df1 = L.featureGroup(
+            var feature_group_d7a919ef808e989218f860eb12876152 = L.featureGroup(
                 {
 }
             );
         
     
-        function geo_json_e025042c3aff4e2cfb144301562c2743_styler(feature) {
+        function geo_json_774187746ccf4979a0797c123fa42aad_styler(feature) {
             switch(feature.properties.route_id) {
                 default:
                     return {"color": "#E91E63", "opacity": 0.85, "weight": 3};
             }
         }
 
-        function geo_json_e025042c3aff4e2cfb144301562c2743_onEachFeature(feature, layer) {
+        function geo_json_774187746ccf4979a0797c123fa42aad_onEachFeature(feature, layer) {
 
             layer.on({
             });
         };
-        var geo_json_e025042c3aff4e2cfb144301562c2743 = L.geoJson(null, {
-                onEachFeature: geo_json_e025042c3aff4e2cfb144301562c2743_onEachFeature,
+        var geo_json_774187746ccf4979a0797c123fa42aad = L.geoJson(null, {
+                onEachFeature: geo_json_774187746ccf4979a0797c123fa42aad_onEachFeature,
             
-                style: geo_json_e025042c3aff4e2cfb144301562c2743_styler,
+                style: geo_json_774187746ccf4979a0797c123fa42aad_styler,
             ...{
 }
         });
 
-        function geo_json_e025042c3aff4e2cfb144301562c2743_add (data) {
-            geo_json_e025042c3aff4e2cfb144301562c2743
+        function geo_json_774187746ccf4979a0797c123fa42aad_add (data) {
+            geo_json_774187746ccf4979a0797c123fa42aad
                 .addData(data);
         }
-            geo_json_e025042c3aff4e2cfb144301562c2743_add({"features": [{"geometry": {"coordinates": [[23.71, 37.93], [23.725, 37.925]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "feature_type": "route", "headsigns": "", "length_km": 1.428, "mode": "Tram", "n_stops": 2, "n_trips": 1, "route_color": "#E91E63", "route_id": "T1", "route_long_name": "Coastal Tram", "route_short_name": "T", "route_text_color": "#FFFFFF", "route_type": 0, "shape_source": "shapes.txt"}, "type": "Feature"}], "type": "FeatureCollection"});
+            geo_json_774187746ccf4979a0797c123fa42aad_add({"features": [{"geometry": {"coordinates": [[23.71, 37.93], [23.725, 37.925]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "feature_type": "route", "headsigns": "", "length_km": 1.428, "mode": "Tram", "n_stops": 2, "n_trips": 1, "route_color": "#E91E63", "route_id": "T1", "route_long_name": "Coastal Tram", "route_short_name": "T", "route_text_color": "#FFFFFF", "route_type": 0, "shape_source": "shapes.txt"}, "type": "Feature"}], "type": "FeatureCollection"});
 
         
     
-            geo_json_e025042c3aff4e2cfb144301562c2743.bindTooltip(
+            geo_json_774187746ccf4979a0797c123fa42aad.bindTooltip(
                 `<div>
                      <b>T</b> Coastal Tram
                  </div>`,
@@ -251,32 +251,32 @@
             );
         
     
-            geo_json_e025042c3aff4e2cfb144301562c2743.addTo(feature_group_5b526be36622847d17a534f37ceb5df1);
+            geo_json_774187746ccf4979a0797c123fa42aad.addTo(feature_group_d7a919ef808e989218f860eb12876152);
         
     
-            feature_group_5b526be36622847d17a534f37ceb5df1.addTo(map_626b7604dcdceb8199c942dcf56aff8f);
+            feature_group_d7a919ef808e989218f860eb12876152.addTo(map_06ca368cb1085a4efff95cef59b90ace);
         
     
-            var feature_group_19d1860c308c1f16feda3afb06c3a737 = L.featureGroup(
+            var feature_group_c0c321f9a913107adce3936994b7982f = L.featureGroup(
                 {
 }
             );
         
     
-            var marker_cluster_91ab48c0d29c27581f57dd97ed930474 = L.markerClusterGroup(
+            var marker_cluster_66760679aa56f40bafaf5f56b231c517 = L.markerClusterGroup(
                 {
   "disableClusteringAtZoom": 15,
 }
             );
         
     
-            var circle_marker_7470cdf908a781ba05d9eff859f99201 = L.circleMarker(
+            var circle_marker_4440b51d97423f8714485ff8f7cf33f4 = L.circleMarker(
                 [37.9755, 23.7348],
                 {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
-            ).addTo(marker_cluster_91ab48c0d29c27581f57dd97ed930474);
+            ).addTo(marker_cluster_66760679aa56f40bafaf5f56b231c517);
         
     
-            circle_marker_7470cdf908a781ba05d9eff859f99201.bindTooltip(
+            circle_marker_4440b51d97423f8714485ff8f7cf33f4.bindTooltip(
                 `<div>
                      Centre
                  </div>`,
@@ -286,13 +286,13 @@
             );
         
     
-            var circle_marker_921a542050c270d8e3bc82aedf16ecd5 = L.circleMarker(
+            var circle_marker_073af6d6460f40a372d36ea0ae37f35f = L.circleMarker(
                 [37.9876, 23.7338],
                 {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
-            ).addTo(marker_cluster_91ab48c0d29c27581f57dd97ed930474);
+            ).addTo(marker_cluster_66760679aa56f40bafaf5f56b231c517);
         
     
-            circle_marker_921a542050c270d8e3bc82aedf16ecd5.bindTooltip(
+            circle_marker_073af6d6460f40a372d36ea0ae37f35f.bindTooltip(
                 `<div>
                      Museum
                  </div>`,
@@ -302,13 +302,13 @@
             );
         
     
-            var circle_marker_e80b1dcb94e104bf6871424a28f2fb1d = L.circleMarker(
+            var circle_marker_fd194dbbdaab4cfb5dfa5d3d1ff4654c = L.circleMarker(
                 [37.9981, 23.7411],
                 {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
-            ).addTo(marker_cluster_91ab48c0d29c27581f57dd97ed930474);
+            ).addTo(marker_cluster_66760679aa56f40bafaf5f56b231c517);
         
     
-            circle_marker_e80b1dcb94e104bf6871424a28f2fb1d.bindTooltip(
+            circle_marker_fd194dbbdaab4cfb5dfa5d3d1ff4654c.bindTooltip(
                 `<div>
                      University
                  </div>`,
@@ -318,13 +318,13 @@
             );
         
     
-            var circle_marker_3a66757f3f3f8343a3a0b3117ad4185c = L.circleMarker(
+            var circle_marker_a7bf32a14ea30e25e24b41a2bf1851fd = L.circleMarker(
                 [37.9356, 23.9468],
                 {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
-            ).addTo(marker_cluster_91ab48c0d29c27581f57dd97ed930474);
+            ).addTo(marker_cluster_66760679aa56f40bafaf5f56b231c517);
         
     
-            circle_marker_3a66757f3f3f8343a3a0b3117ad4185c.bindTooltip(
+            circle_marker_a7bf32a14ea30e25e24b41a2bf1851fd.bindTooltip(
                 `<div>
                      Airport
                  </div>`,
@@ -334,13 +334,13 @@
             );
         
     
-            var circle_marker_b1394845a6f59573ea22646aba9b9405 = L.circleMarker(
+            var circle_marker_53d01d98c8ba0cd803508e3017087f1d = L.circleMarker(
                 [37.93, 23.71],
                 {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
-            ).addTo(marker_cluster_91ab48c0d29c27581f57dd97ed930474);
+            ).addTo(marker_cluster_66760679aa56f40bafaf5f56b231c517);
         
     
-            circle_marker_b1394845a6f59573ea22646aba9b9405.bindTooltip(
+            circle_marker_53d01d98c8ba0cd803508e3017087f1d.bindTooltip(
                 `<div>
                      Beach
                  </div>`,
@@ -350,13 +350,13 @@
             );
         
     
-            var circle_marker_e393810f8e6019229df53deaa768b72e = L.circleMarker(
+            var circle_marker_be704ca60b22a5276f0766bc1f23331d = L.circleMarker(
                 [37.925, 23.725],
                 {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
-            ).addTo(marker_cluster_91ab48c0d29c27581f57dd97ed930474);
+            ).addTo(marker_cluster_66760679aa56f40bafaf5f56b231c517);
         
     
-            circle_marker_e393810f8e6019229df53deaa768b72e.bindTooltip(
+            circle_marker_be704ca60b22a5276f0766bc1f23331d.bindTooltip(
                 `<div>
                      Marina
                  </div>`,
@@ -366,46 +366,46 @@
             );
         
     
-            marker_cluster_91ab48c0d29c27581f57dd97ed930474.addTo(feature_group_19d1860c308c1f16feda3afb06c3a737);
+            marker_cluster_66760679aa56f40bafaf5f56b231c517.addTo(feature_group_c0c321f9a913107adce3936994b7982f);
         
     
-            var layer_control_7fdcd47c9338594253f06c00cb4fcc56_layers = {
+            var layer_control_164cdb0fa6c70673c92dac8a30e55b9f_layers = {
                 base_layers : {
-                    "cartodbpositron" : tile_layer_0a6e0ea1c9d7297b7f07b233a0da7a99,
+                    "cartodbpositron" : tile_layer_876143387d717cec6a62767a0ff551d2,
                 },
                 overlays :  {
-                    "Bus (1)" : feature_group_ddbb8053f1ab9fc1322fa1e88434dcf8,
-                    "Metro (1)" : feature_group_4abe662b285a480c1dd5df5fb2deb974,
-                    "Tram (1)" : feature_group_5b526be36622847d17a534f37ceb5df1,
-                    "Stops (6)" : feature_group_19d1860c308c1f16feda3afb06c3a737,
+                    "Bus (1)" : feature_group_c3f4016a0cb62fb46b832b9f26baa31c,
+                    "Metro (1)" : feature_group_b8666a958bcf7c653664bb49dd21e5f0,
+                    "Tram (1)" : feature_group_d7a919ef808e989218f860eb12876152,
+                    "Stops (6)" : feature_group_c0c321f9a913107adce3936994b7982f,
                 },
             };
-            let layer_control_7fdcd47c9338594253f06c00cb4fcc56 = L.control.layers(
-                layer_control_7fdcd47c9338594253f06c00cb4fcc56_layers.base_layers,
-                layer_control_7fdcd47c9338594253f06c00cb4fcc56_layers.overlays,
+            let layer_control_164cdb0fa6c70673c92dac8a30e55b9f = L.control.layers(
+                layer_control_164cdb0fa6c70673c92dac8a30e55b9f_layers.base_layers,
+                layer_control_164cdb0fa6c70673c92dac8a30e55b9f_layers.overlays,
                 {
   "position": "topright",
   "collapsed": false,
   "autoZIndex": true,
 }
-            ).addTo(map_626b7604dcdceb8199c942dcf56aff8f);
+            ).addTo(map_06ca368cb1085a4efff95cef59b90ace);
 
         
     
-            var marker_dd518f5eb79253d346e9cf04d2623070 = L.marker(
+            var marker_a42a82227572a2ece547bf549ff2b0e3 = L.marker(
                 [37.9981, 23.9468],
                 {
 }
-            ).addTo(map_626b7604dcdceb8199c942dcf56aff8f);
+            ).addTo(map_06ca368cb1085a4efff95cef59b90ace);
         
     
-            var div_icon_9280e191a40217c97824c5fce3276157 = L.divIcon({
+            var div_icon_700525033b784f308c8e3beb4c4fdba2 = L.divIcon({
   "html": "\u003cdiv style=\"background:rgba(255,255,255,.9);padding:4px 8px;border-radius:4px;font:12px/1.4 system-ui;border:1px solid #ddd\"\u003eDemo feed\u003c/div\u003e",
   "className": "empty",
 });
         
     
-                marker_dd518f5eb79253d346e9cf04d2623070.setIcon(div_icon_9280e191a40217c97824c5fce3276157);
+                marker_a42a82227572a2ece547bf549ff2b0e3.setIcon(div_icon_700525033b784f308c8e3beb4c4fdba2);
             
 </script>
 </html>

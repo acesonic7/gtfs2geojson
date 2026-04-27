@@ -14,6 +14,8 @@ Built for transit data folks who want a quick, dependency-light way to go from `
 - **Reconstructs missing geometry** from `stop_times` when a route has no entry in `shapes.txt` (common for metros/trams in older feeds)
 - **Filters**: by mode (`--mode Bus`), by agency (`--agency OASA`), by bounding box (`--bbox w,s,e,n`), by **service day** (`--date 20260615`)
 - **Line simplification** with Ramer-Douglas-Peucker (`--simplify 0.0001`) for smaller, faster-rendering output
+- **Output formats**: standard GeoJSON or **GeoJSON-seq** (`--format geojsonseq`) for tippecanoe / ogr2ogr pipelines
+- **Introspection**: `--list-modes` and `--list-agencies` (with `--json`) to peek at a feed without converting
 - **Optional Folium preview** with per-mode toggleable layers and clustered stops
 - **Extended GTFS route types** supported (HVT codes 100–1700)
 
@@ -55,6 +57,13 @@ gtfs2geojson feed.zip --date 20260615 -o that_monday.geojson
 # simplify polylines for web/mobile rendering (~10 m at most latitudes)
 gtfs2geojson feed.zip --simplify 0.0001 -o feed.simplified.geojson
 
+# pipe straight into tippecanoe (GeoJSON-seq, one Feature per record)
+gtfs2geojson feed.zip --format geojsonseq | tippecanoe -o feed.mbtiles
+
+# peek at what a feed contains, without converting
+gtfs2geojson feed.zip --list-modes
+gtfs2geojson feed.zip --list-agencies --json | jq '.[] | select(.n_routes > 5)'
+
 # feed already extracted to a directory
 gtfs2geojson ./gtfs_extracted/ -o feed.geojson
 ```
@@ -68,7 +77,7 @@ gtfs2geojson feed.zip | jq '.features | length'
 ## Python API
 
 ```python
-from gtfs2geojson import convert, write
+from gtfs2geojson import convert, write, list_modes, list_agencies
 from gtfs2geojson.preview import render
 
 geo = convert(
@@ -79,8 +88,13 @@ geo = convert(
     simplify_tolerance=0.0001,       # ~10 m perpendicular tolerance
     include_stops=True,
 )
-write(geo, "feed.geojson")
+write(geo, "feed.geojson")                    # default
+write(geo, "feed.geojsonseq", format="geojsonseq")  # one Feature per RFC-8142 record
 render(geo, "preview.html", title="Athens core network")
+
+# Peek at a feed without converting
+list_modes("feed.zip")        # -> {"Bus": 42, "Metro": 3, ...}
+list_agencies("feed.zip")     # -> [{"agency_id": "OASA", "agency_name": "OASA", "n_routes": 45}, ...]
 ```
 
 ## Output schema

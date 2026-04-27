@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-04-27
+
+### Added
+- **`--format {geojson,geojsonseq}` / `write(..., format=)`** — emit either a
+  single ``FeatureCollection`` (default) or RFC 8142 record-separated GeoJSON
+  with one ``Feature`` per record. Compatible with `tippecanoe` and
+  `ogr2ogr`'s `GeoJSONSeq` driver.
+- **`--list-modes`** and **`--list-agencies`** introspection subcommands.
+  Read just `routes.txt` (+ `agency.txt`) and print mode / agency labels with
+  per-item route counts. Mutually exclusive with each other.
+- **`--json`** modifier for the introspection commands — switches the output
+  from aligned columns to a machine-readable JSON list.
+- New public API: `gtfs2geojson.list_modes(source)` and
+  `gtfs2geojson.list_agencies(source)`.
+- 19 new tests across `test_format.py`, `test_introspect.py`, and
+  `test_cli.py`. Suite is now **62 passing** on Python 3.12.
+
+### Changed
+- `agency.txt` is now read **before** `routes.txt`. The route's
+  `agency_id` field on each output feature carries the *resolved* agency id —
+  either as written, or filled in from the sole agency when the GTFS
+  sole-agency rule applies (see Bug #4 below).
+
+### Fixed
+- **Bug #4**: when a feed has exactly one agency, routes whose `agency_id`
+  is empty are now correctly attributed to that agency. Previously they
+  were dropped by `--agency` filters and bucketed under the empty string in
+  agency listings.
+
 ## [0.3.0] - 2026-04-27
 
 ### Added
@@ -87,7 +116,8 @@ Initial release. Source corresponds to the contents of `gtfs2geojson.tar.gz`.
 - Geometry reconstruction from `stop_times` when `shapes.txt` is absent.
 - Optional Folium preview map under the `[preview]` extra.
 
-[Unreleased]: https://github.com/acesonic7/gtfs2geojson/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/acesonic7/gtfs2geojson/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/acesonic7/gtfs2geojson/releases/tag/v0.1.0

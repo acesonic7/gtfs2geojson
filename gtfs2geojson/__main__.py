@@ -2,10 +2,11 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
-from .converter import convert, write
+from .converter import convert, list_agencies, list_modes, write
 
 
 def _parse_bbox(s: str) -> tuple[float, float, float, float]:
@@ -15,6 +16,36 @@ def _parse_bbox(s: str) -> tuple[float, float, float, float]:
     return parts[0], parts[1], parts[2], parts[3]
 
 
+def _print_modes(counts: dict[str, int], as_json: bool) -> None:
+    if as_json:
+        rows = [{"mode": m, "n_routes": n} for m, n in
+                sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))]
+        sys.stdout.write(json.dumps(rows, ensure_ascii=False) + "\n")
+        return
+    if not counts:
+        return
+    width = max(len(m) for m in counts)
+    print(f"{'Mode'.ljust(width)}  Routes")
+    for mode, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0])):
+        print(f"{mode.ljust(width)}  {n:>6}")
+
+
+def _print_agencies(rows: list[dict], as_json: bool) -> None:
+    if as_json:
+        sys.stdout.write(json.dumps(rows, ensure_ascii=False) + "\n")
+        return
+    if not rows:
+        return
+    id_w = max(len(r["agency_id"] or "(none)") for r in rows)
+    name_w = max(len(r["agency_name"] or "") for r in rows)
+    id_w = max(id_w, len("agency_id"))
+    name_w = max(name_w, len("agency_name"))
+    print(f"{'agency_id'.ljust(id_w)}  {'agency_name'.ljust(name_w)}  Routes")
+    for r in sorted(rows, key=lambda x: (-x["n_routes"], x["agency_id"])):
+        aid = r["agency_id"] or "(none)"
+        print(f"{aid.ljust(id_w)}  {r['agency_name'].ljust(name_w)}  {r['n_routes']:>6}")
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(
         prog="gtfs2geojson",
@@ -22,7 +53,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     p.add_argument("source", help="Path to a GTFS .zip file or directory")
     p.add_argument("-o", "--output", default="-",
-                   help="Output GeoJSON path (default: stdout)")
+                   help="Output path (default: stdout)")
+    p.add_argument("--format", choices=("geojson", "geojsonseq"), default="geojson",
+                   help="Output format: 'geojson' (default, single FeatureCollection) "
+                        "or 'geojsonseq' (RFC 8142, one Feature per record — for "
+                        "tippecanoe / ogr2ogr's GeoJSONSeq driver).")
     p.add_argument("--preview", metavar="HTML",
                    help="Also write an interactive Folium preview map to this path")
     p.add_argument("--mode", action="append", default=None,
@@ -47,6 +82,14 @@ def main(argv: list[str] | None = None) -> int:
                    help="Simplify polylines using Ramer-Douglas-Peucker with this "
                         "tolerance in degrees of lon/lat (e.g. 0.0001 ≈ 10 m). "
                         "Endpoints are preserved.")
+    introspect = p.add_mutually_exclusive_group()
+    introspect.add_argument("--list-modes", action="store_true",
+                            help="List the modes present in routes.txt with route "
+                                 "counts and exit. Other conversion flags are ignored.")
+    introspect.add_argument("--list-agencies", action="store_true",
+                            help="List the agencies present (with route counts) and exit.")
+    p.add_argument("--json", action="store_true",
+                   help="Emit machine-readable JSON for --list-modes / --list-agencies.")
     p.add_argument("--title", default=None,
                    help="Title shown in the preview map (defaults to source filename)")
 
@@ -55,6 +98,13 @@ def main(argv: list[str] | None = None) -> int:
     if not Path(args.source).exists():
         print(f"error: source not found: {args.source}", file=sys.stderr)
         return 2
+
+    if args.list_modes:
+        _print_modes(list_modes(args.source), as_json=args.json)
+        return 0
+    if args.list_agencies:
+        _print_agencies(list_agencies(args.source), as_json=args.json)
+        return 0
 
     geojson = convert(
         args.source,
@@ -73,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"converted: {n_routes} route features, {n_stops} stop features",
           file=sys.stderr)
 
-    write(geojson, args.output)
+    write(geojson, args.output, format=args.format)
 
     if args.preview:
         from .preview import render
