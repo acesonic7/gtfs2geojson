@@ -16,7 +16,7 @@ Built for transit data folks who want a quick, dependency-light way to go from `
 - **Line simplification** with Ramer-Douglas-Peucker (`--simplify 0.0001`) for smaller, faster-rendering output
 - **Output formats**: standard GeoJSON or **GeoJSON-seq** (`--format geojsonseq`) for tippecanoe / ogr2ogr pipelines
 - **Introspection**: `--list-modes` and `--list-agencies` (with `--json`) to peek at a feed without converting
-- **Optional Folium preview** with per-mode toggleable layers and clustered stops
+- **Optional Folium preview** with per-mode toggleable layers, mode legend, summary sidebar, stop search, and configurable tiles (`--tiles dark_matter`)
 - **Extended GTFS route types** supported (HVT codes 100–1700)
 
 ## Install
@@ -40,8 +40,11 @@ pip install -e ".[preview]"
 # basic
 gtfs2geojson feed.zip -o feed.geojson
 
-# with interactive map
+# with interactive map (CARTO Positron tiles by default)
 gtfs2geojson feed.zip -o feed.geojson --preview map.html
+
+# dark basemap for nighttime / dataviz
+gtfs2geojson feed.zip --preview map.html --tiles dark_matter
 
 # filter to buses + metro inside a bbox, skip stops
 gtfs2geojson feed.zip \
@@ -90,7 +93,7 @@ geo = convert(
 )
 write(geo, "feed.geojson")                    # default
 write(geo, "feed.geojsonseq", format="geojsonseq")  # one Feature per RFC-8142 record
-render(geo, "preview.html", title="Athens core network")
+render(geo, "preview.html", title="Athens core network", tiles="dark_matter")
 
 # Peek at a feed without converting
 list_modes("feed.zip")        # -> {"Bus": 42, "Metro": 3, ...}

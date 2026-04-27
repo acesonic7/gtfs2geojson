@@ -92,6 +92,10 @@ def main(argv: list[str] | None = None) -> int:
                    help="Emit machine-readable JSON for --list-modes / --list-agencies.")
     p.add_argument("--title", default=None,
                    help="Title shown in the preview map (defaults to source filename)")
+    p.add_argument("--tiles", default="positron",
+                   help="Tile provider for the preview map. Aliases: 'positron' "
+                        "(default, light), 'osm', 'dark_matter'. Or pass any string "
+                        "Folium accepts as its tiles= argument.")
 
     args = p.parse_args(argv)
 
@@ -127,7 +131,12 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.preview:
         from .preview import render
-        render(geojson, args.preview, title=args.title or Path(args.source).name)
+        render(
+            geojson,
+            args.preview,
+            title=args.title or Path(args.source).name,
+            tiles=args.tiles,
+        )
         print(f"preview: {args.preview}", file=sys.stderr)
 
     return 0

@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-04-27
+
+### Added
+- **Mode legend** in the preview map (bottom-right): each mode with its
+  colour swatch and route count.
+- **Summary sidebar** in the preview map (bottom-left, collapsible via the
+  native `<details>` element): feed title, agencies, route counts by mode,
+  stop count, and total network length.
+- **Stop search** via `folium.plugins.Search` keyed on `stop_name`. The
+  search box appears top-left of the map.
+- **Configurable tiles**: `tiles=` parameter on `render()` and `--tiles`
+  CLI flag. Aliases `positron` (default), `osm`, `dark_matter`. Any other
+  string is forwarded straight to Folium.
+- 13 new tests in `test_preview.py` (skipped automatically when the
+  `[preview]` extra is not installed). Suite is now **75 passing**.
+
+### Changed
+- Stops are now rendered as a `folium.GeoJson` layer (with `CircleMarker`
+  styling) rather than a `MarkerCluster`. This is what makes them
+  searchable. Visual appearance is essentially unchanged — small white dots
+  with grey outline, hidden by default in the layer control.
+- Removed the floating title marker from the corner of the map; the same
+  information now lives in the sidebar header.
+
+### Fixed
+- **Bug #11**: removed the redundant `attr=` on `folium.Map(...)` — for
+  built-in tile names (`cartodbpositron` etc.) Folium provides the
+  attribution itself, and the manually-supplied attribution was being
+  ignored.
+
 ## [0.4.0] - 2026-04-27
 
 ### Added
@@ -116,7 +146,8 @@ Initial release. Source corresponds to the contents of `gtfs2geojson.tar.gz`.
 - Geometry reconstruction from `stop_times` when `shapes.txt` is absent.
 - Optional Folium preview map under the `[preview]` extra.
 
-[Unreleased]: https://github.com/acesonic7/gtfs2geojson/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/acesonic7/gtfs2geojson/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.1.0...v0.2.0
