@@ -39,3 +39,7 @@ Issues = "https://github.com/acesonic7/gtfs2geojson/issues"
 
 [tool.setuptools.packages.find]
 include = ["gtfs2geojson*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
