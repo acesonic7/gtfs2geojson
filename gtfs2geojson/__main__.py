@@ -39,6 +39,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--keep-orphan-stops", action="store_true",
                    help="Keep stop features even when no kept trip touches them "
                         "(default: drop orphans)")
+    p.add_argument("--date", default=None,
+                   help="Only keep trips active on this calendar date "
+                        "(YYYYMMDD or YYYY-MM-DD). Combines calendar.txt weekday "
+                        "rules with calendar_dates.txt exceptions.")
+    p.add_argument("--simplify", type=float, default=None, metavar="TOLERANCE",
+                   help="Simplify polylines using Ramer-Douglas-Peucker with this "
+                        "tolerance in degrees of lon/lat (e.g. 0.0001 ≈ 10 m). "
+                        "Endpoints are preserved.")
     p.add_argument("--title", default=None,
                    help="Title shown in the preview map (defaults to source filename)")
 
@@ -56,6 +64,8 @@ def main(argv: list[str] | None = None) -> int:
         include_stops=not args.no_stops,
         reconstruct_missing_shapes=not args.no_reconstruct,
         keep_orphan_stops=args.keep_orphan_stops,
+        service_date=args.date,
+        simplify_tolerance=args.simplify,
     )
 
     n_routes = sum(1 for f in geojson["features"] if f["geometry"]["type"] != "Point")

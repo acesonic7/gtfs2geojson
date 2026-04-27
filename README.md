@@ -12,7 +12,8 @@ Built for transit data folks who want a quick, dependency-light way to go from `
 - **Stops as Point** features
 - **Mode-aware styling** — readable labels (Bus / Metro / Tram / Ferry / Trolleybus / …) with sensible default colours, falling back from `route_color` when missing
 - **Reconstructs missing geometry** from `stop_times` when a route has no entry in `shapes.txt` (common for metros/trams in older feeds)
-- **Filters**: by mode (`--mode Bus`), by agency (`--agency OASA`), by bounding box (`--bbox w,s,e,n`)
+- **Filters**: by mode (`--mode Bus`), by agency (`--agency OASA`), by bounding box (`--bbox w,s,e,n`), by **service day** (`--date 20260615`)
+- **Line simplification** with Ramer-Douglas-Peucker (`--simplify 0.0001`) for smaller, faster-rendering output
 - **Optional Folium preview** with per-mode toggleable layers and clustered stops
 - **Extended GTFS route types** supported (HVT codes 100–1700)
 
@@ -47,6 +48,13 @@ gtfs2geojson feed.zip \
   --no-stops \
   -o athens_core.geojson
 
+# only trips active on a particular calendar date (combines calendar.txt
+# weekday rules with calendar_dates.txt exceptions)
+gtfs2geojson feed.zip --date 20260615 -o that_monday.geojson
+
+# simplify polylines for web/mobile rendering (~10 m at most latitudes)
+gtfs2geojson feed.zip --simplify 0.0001 -o feed.simplified.geojson
+
 # feed already extracted to a directory
 gtfs2geojson ./gtfs_extracted/ -o feed.geojson
 ```
@@ -67,6 +75,8 @@ geo = convert(
     "feed.zip",
     modes=["Bus", "Trolleybus"],
     bbox=(23.6, 37.9, 23.8, 38.05),
+    service_date="2026-06-15",       # also accepts "20260615" or datetime.date
+    simplify_tolerance=0.0001,       # ~10 m perpendicular tolerance
     include_stops=True,
 )
 write(geo, "feed.geojson")
@@ -116,7 +126,6 @@ Converting GTFS to GeoJSON should be a one-liner. Most existing options either:
 
 ## Limitations / non-goals
 
-- No service-day filtering — `calendar.txt` and `calendar_dates.txt` are ignored. Every route with at least one trip is included.
 - No frequency or schedule data on the output.
 - No realtime (GTFS-RT) support — schedule feeds only.
 

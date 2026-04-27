@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-27
+
+### Added
+- **`--date YYYYMMDD` / `service_date=`** filter — keep only trips whose
+  `service_id` is active on the given calendar day. Combines `calendar.txt`
+  weekday rules (within `start_date`/`end_date`) with `calendar_dates.txt`
+  exceptions (`exception_type=1` adds, `=2` removes). Accepts `YYYYMMDD`,
+  `YYYY-MM-DD`, or a `datetime.date`.
+- **`--simplify TOLERANCE` / `simplify_tolerance=`** — Ramer-Douglas-Peucker
+  line simplification, tolerance in degrees of lon/lat (~111 km × cos(lat)
+  per degree). Endpoints preserved. `length_km` is recomputed *after*
+  simplification so it always matches the emitted geometry.
+- 23 new tests covering date normalisation, calendar/calendar_dates rules,
+  RDP edge cases, post-simplify length consistency, and the bug-fix paths
+  below. Suite is now 43 passing.
+
+### Changed
+- Reconstruction is now built for **every** route that has trips with
+  `stop_times` entries, and applied as a fallback whenever the shapes-derived
+  geometry is empty — not only when the route had no `shape_id` at all.
+- Stops are read into an unfiltered `all_stops` dict; the bbox-filtered
+  output set is derived from it. This lets reconstruction draw on stops
+  outside the bbox so the resulting line can then be evaluated against the
+  same any-vertex-in-bbox rule that shapes use.
+
+### Fixed
+- **Bug #2**: a route whose only `shape_id` resolves to fewer than two valid
+  points is no longer dropped silently — it now falls back to stop-sequence
+  reconstruction (when `reconstruct_missing_shapes=True`).
+- **Bug #3**: bbox treatment is now consistent for shapes vs reconstructed
+  lines. Both use the "keep the whole line if any vertex is in the bbox"
+  rule. Previously reconstruction was implicitly clipped to in-bbox stops,
+  which could produce lines that wouldn't have been emitted from a
+  shapes-derived path covering the same geometry.
+
 ## [0.2.0] - 2026-04-27
 
 ### Added
@@ -52,6 +87,7 @@ Initial release. Source corresponds to the contents of `gtfs2geojson.tar.gz`.
 - Geometry reconstruction from `stop_times` when `shapes.txt` is absent.
 - Optional Folium preview map under the `[preview]` extra.
 
-[Unreleased]: https://github.com/acesonic7/gtfs2geojson/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/acesonic7/gtfs2geojson/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/acesonic7/gtfs2geojson/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/acesonic7/gtfs2geojson/releases/tag/v0.1.0

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import datetime as _dt
 import io
 import json
 import math
@@ -111,6 +112,113 @@ def _line_length_km(coords: list[list[float]]) -> float:
     return total
 
 
+def _normalise_gtfs_date(value: str | _dt.date) -> str:
+    """Coerce a date input into the GTFS ``YYYYMMDD`` form.
+
+    Accepts ``datetime.date``/``datetime.datetime``, ``YYYYMMDD``, or ISO
+    ``YYYY-MM-DD``. Raises ``ValueError`` for anything else.
+    """
+    if isinstance(value, _dt.datetime):
+        value = value.date()
+    if isinstance(value, _dt.date):
+        return value.strftime("%Y%m%d")
+    s = str(value).strip()
+    if len(s) == 8 and s.isdigit():
+        _dt.datetime.strptime(s, "%Y%m%d")  # validates
+        return s
+    if len(s) == 10 and s[4] == "-" and s[7] == "-":
+        return _dt.datetime.strptime(s, "%Y-%m-%d").strftime("%Y%m%d")
+    raise ValueError(f"unrecognised date format: {value!r} (expected YYYYMMDD or YYYY-MM-DD)")
+
+
+_WEEKDAY_COLUMNS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
+def _active_services_on(source: str | Path, gtfs_date: str) -> set[str]:
+    """Return the set of ``service_id`` values active on the given GTFS date.
+
+    Combines ``calendar.txt`` (weekday flags within ``start_date``/``end_date``)
+    with ``calendar_dates.txt`` exceptions: ``exception_type=1`` adds, ``=2`` removes.
+    Either file may be absent — the rules degrade gracefully.
+    """
+    target = _dt.datetime.strptime(gtfs_date, "%Y%m%d").date()
+    weekday_col = _WEEKDAY_COLUMNS[target.weekday()]
+
+    active: set[str] = set()
+    for c in _read_csv(source, "calendar.txt"):
+        sid = c.get("service_id", "")
+        if not sid:
+            continue
+        try:
+            start = _dt.datetime.strptime(c.get("start_date", ""), "%Y%m%d").date()
+            end = _dt.datetime.strptime(c.get("end_date", ""), "%Y%m%d").date()
+        except ValueError:
+            continue
+        if not (start <= target <= end):
+            continue
+        if c.get(weekday_col, "0") == "1":
+            active.add(sid)
+
+    for x in _read_csv(source, "calendar_dates.txt"):
+        if x.get("date", "") != gtfs_date:
+            continue
+        sid = x.get("service_id", "")
+        et = x.get("exception_type", "")
+        if et == "1":
+            active.add(sid)
+        elif et == "2":
+            active.discard(sid)
+    return active
+
+
+def _rdp(points: list[list[float]], epsilon: float) -> list[list[float]]:
+    """Iterative Ramer-Douglas-Peucker line simplification.
+
+    ``epsilon`` is a perpendicular-distance tolerance in degrees of lon/lat.
+    Endpoints are always preserved. Returns ``points`` unchanged if it has fewer
+    than three vertices or ``epsilon <= 0``.
+
+    Rough degree → metre conversion at common latitudes (1° lat ≈ 111 km;
+    1° lon at 40°N ≈ 85 km). So ``epsilon=0.0001`` ≈ 8-11 metres.
+    """
+    n = len(points)
+    if n < 3 or epsilon <= 0:
+        return points
+    keep = [False] * n
+    keep[0] = True
+    keep[-1] = True
+    stack: list[tuple[int, int]] = [(0, n - 1)]
+    eps_sq = epsilon * epsilon
+    while stack:
+        i, j = stack.pop()
+        if j - i < 2:
+            continue
+        ax, ay = points[i]
+        bx, by = points[j]
+        dx = bx - ax
+        dy = by - ay
+        seg_len_sq = dx * dx + dy * dy
+        max_d_sq = -1.0
+        max_idx = -1
+        for k in range(i + 1, j):
+            px, py = points[k]
+            if seg_len_sq == 0.0:
+                d_sq = (px - ax) ** 2 + (py - ay) ** 2
+            else:
+                t = ((px - ax) * dx + (py - ay) * dy) / seg_len_sq
+                projx = ax + t * dx
+                projy = ay + t * dy
+                d_sq = (px - projx) ** 2 + (py - projy) ** 2
+            if d_sq > max_d_sq:
+                max_d_sq = d_sq
+                max_idx = k
+        if max_d_sq > eps_sq:
+            keep[max_idx] = True
+            stack.append((i, max_idx))
+            stack.append((max_idx, j))
+    return [points[k] for k in range(n) if keep[k]]
+
+
 def convert(
     source: str | Path,
     *,
@@ -120,6 +228,8 @@ def convert(
     include_stops: bool = True,
     reconstruct_missing_shapes: bool = True,
     keep_orphan_stops: bool = False,
+    service_date: str | _dt.date | None = None,
+    simplify_tolerance: float | None = None,
 ) -> dict:
     """Convert a GTFS feed (zip file or directory) to a GeoJSON FeatureCollection.
 
@@ -132,16 +242,34 @@ def convert(
     source : path to .zip or directory containing GTFS .txt files
     modes : optional iterable of mode labels to keep (e.g. ['Bus','Metro']). Case-insensitive.
     agencies : optional iterable of agency_id values to keep.
-    bbox : optional (west, south, east, north) lon/lat filter.
+    bbox : optional (west, south, east, north) lon/lat filter. Lines are kept if
+        any vertex falls in the box; the geometry is not clipped.
     include_stops : whether to emit stop features.
-    reconstruct_missing_shapes : if a route has no shapes.txt entry, build polylines
-        from its stop_times sequence as a fallback.
+    reconstruct_missing_shapes : if a route's shapes are missing or empty, fall back
+        to building polylines from its stop_times sequence.
     keep_orphan_stops : if True, emit stop features even when no kept trip touches
         them. Defaults to False (orphan stops are dropped). Has no effect when
         ``stop_times.txt`` is missing — in that case all stops are kept.
+    service_date : if set, only keep trips whose ``service_id`` is active on the
+        given GTFS calendar date. Accepts ``datetime.date`` or a string in
+        ``YYYYMMDD`` / ``YYYY-MM-DD`` form.
+    simplify_tolerance : if set and > 0, simplify each polyline with the
+        Ramer-Douglas-Peucker algorithm using this tolerance in degrees of
+        lon/lat. Endpoints are preserved. ``length_km`` is computed *after*
+        simplification so it always matches the emitted geometry.
     """
     mode_filter = {m.lower() for m in modes} if modes else None
     agency_filter = set(agencies) if agencies else None
+    service_filter: set[str] | None = None
+    if service_date is not None:
+        gtfs_date = _normalise_gtfs_date(service_date)
+        service_filter = _active_services_on(source, gtfs_date)
+        if not service_filter:
+            print(
+                f"warning: no services active on {gtfs_date}; output will contain "
+                "no route features",
+                file=sys.stderr,
+            )
 
     # ── Routes ────────────────────────────────────────────────────────────
     routes_raw = _read_csv(source, "routes.txt")
@@ -200,6 +328,8 @@ def convert(
         rid = t.get("route_id", "")
         if rid not in routes:
             continue
+        if service_filter is not None and t.get("service_id", "") not in service_filter:
+            continue
         tid = t.get("trip_id", "")
         if tid:
             trip_to_route[tid] = rid
@@ -212,22 +342,27 @@ def convert(
             route_headsigns[rid].add(hs)
 
     # ── Stops ─────────────────────────────────────────────────────────────
-    stops: dict[str, dict] = {}
+    # all_stops is unfiltered — used for shape reconstruction so a route whose
+    # stops sit just outside the bbox can still produce a candidate line that
+    # then goes through the same any-vertex-in-bbox rule shapes use.
+    # `stops` is the bbox-filtered subset that actually gets emitted.
+    all_stops: dict[str, dict] = {}
     for s in _read_csv(source, "stops.txt"):
         try:
             lat = float(s["stop_lat"])
             lon = float(s["stop_lon"])
         except (KeyError, ValueError):
             continue
-        if not _in_bbox(lon, lat, bbox):
-            continue
-        stops[s["stop_id"]] = {
+        all_stops[s["stop_id"]] = {
             "stop_id": s["stop_id"],
             "stop_name": s.get("stop_name", ""),
             "stop_code": s.get("stop_code", ""),
             "lat": lat,
             "lon": lon,
         }
+    stops: dict[str, dict] = {
+        sid: s for sid, s in all_stops.items() if _in_bbox(s["lon"], s["lat"], bbox)
+    }
 
     # ── Single pass over stop_times.txt ──────────────────────────────────
     # Builds, in one walk:
@@ -259,28 +394,33 @@ def convert(
             trip_stop_seq[tid].append((seq, sid))
 
     # ── Optional shape reconstruction from stop_times ────────────────────
+    # We build a candidate reconstruction for every route that has at least one
+    # trip with stop_times — not only routes whose `route_shapes` set is empty.
+    # The feature loop below then uses it as a fallback whenever the
+    # shapes.txt-derived `lines` list ends up empty (e.g. shape_id present but
+    # the shape has < 2 valid points, or all shape vertices are outside bbox).
     reconstructed: dict[str, list[tuple[float, float]]] = {}
     if reconstruct_missing_shapes and trip_stop_seq:
-        routes_missing = {rid for rid in routes if not route_shapes.get(rid)}
-        if routes_missing:
-            best_trip: dict[str, str] = {}
-            for tid, seq in trip_stop_seq.items():
-                rid = trip_to_route.get(tid)
-                if rid not in routes_missing:
-                    continue
-                if rid not in best_trip or len(seq) > len(trip_stop_seq[best_trip[rid]]):
-                    best_trip[rid] = tid
-            for rid, tid in best_trip.items():
-                seq = sorted(trip_stop_seq[tid])
-                pts = []
-                for _, sid in seq:
-                    if sid in stops:
-                        pts.append((stops[sid]["lon"], stops[sid]["lat"]))
-                if len(pts) >= 2:
-                    reconstructed[rid] = pts
+        best_trip: dict[str, str] = {}
+        for tid, seq in trip_stop_seq.items():
+            rid = trip_to_route.get(tid)
+            if rid is None:
+                continue
+            if rid not in best_trip or len(seq) > len(trip_stop_seq[best_trip[rid]]):
+                best_trip[rid] = tid
+        for rid, tid in best_trip.items():
+            seq = sorted(trip_stop_seq[tid])
+            pts: list[tuple[float, float]] = []
+            for _, sid in seq:
+                s = all_stops.get(sid)
+                if s is not None:
+                    pts.append((s["lon"], s["lat"]))
+            if len(pts) >= 2:
+                reconstructed[rid] = pts
 
     # ── Build features ────────────────────────────────────────────────────
     features: list[dict] = []
+    do_simplify = simplify_tolerance is not None and simplify_tolerance > 0
 
     for rid, info in routes.items():
         lines: list[list[list[float]]] = []
@@ -292,10 +432,14 @@ def convert(
                     lines.append(line)
         used_reconstruction = False
         if not lines and rid in reconstructed:
-            lines.append([[x, y] for x, y in reconstructed[rid]])
-            used_reconstruction = True
+            line = [[x, y] for x, y in reconstructed[rid]]
+            if bbox is None or any(_in_bbox(x, y, bbox) for x, y in line):
+                lines.append(line)
+                used_reconstruction = True
         if not lines:
             continue
+        if do_simplify:
+            lines = [_rdp(line, simplify_tolerance) for line in lines]  # type: ignore[arg-type]
         length_km = sum(_line_length_km(line) for line in lines)
         props = dict(info)
         props["feature_type"] = "route"
