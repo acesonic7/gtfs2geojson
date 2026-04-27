@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_2ea645f9df5d15175dadbb4e46a1e501 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/leaflet.markercluster.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.1.0/MarkerCluster.Default.css"/>
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_2ea645f9df5d15175dadbb4e46a1e501" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_2ea645f9df5d15175dadbb4e46a1e501 = L.map(
+                "map_2ea645f9df5d15175dadbb4e46a1e501",
+                {
+                    center: [37.96155, 23.828400000000002],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 11,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_a4439edaaa71c3fd676d3eece2689def = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u00a9 OpenStreetMap contributors \u00a9 CARTO",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_a4439edaaa71c3fd676d3eece2689def.addTo(map_2ea645f9df5d15175dadbb4e46a1e501);
+        
+    
+            map_2ea645f9df5d15175dadbb4e46a1e501.fitBounds(
+                [[37.925, 23.71], [37.9981, 23.9468]],
+                {}
+            );
+        
+    
+            var feature_group_1dbb70d7e62e5da003f2ce45cd72b446 = L.featureGroup(
+                {
+}
+            );
+        
+    
+        function geo_json_983cfdb64c146e5a2f019a0c4d2437a5_styler(feature) {
+            switch(feature.properties.route_id) {
+                default:
+                    return {"color": "#1976D2", "opacity": 0.85, "weight": 3};
+            }
+        }
+
+        function geo_json_983cfdb64c146e5a2f019a0c4d2437a5_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_983cfdb64c146e5a2f019a0c4d2437a5 = L.geoJson(null, {
+                onEachFeature: geo_json_983cfdb64c146e5a2f019a0c4d2437a5_onEachFeature,
+            
+                style: geo_json_983cfdb64c146e5a2f019a0c4d2437a5_styler,
+            ...{
+}
+        });
+
+        function geo_json_983cfdb64c146e5a2f019a0c4d2437a5_add (data) {
+            geo_json_983cfdb64c146e5a2f019a0c4d2437a5
+                .addData(data);
+        }
+            geo_json_983cfdb64c146e5a2f019a0c4d2437a5_add({"features": [{"geometry": {"coordinates": [[23.7348, 37.9755], [23.8, 37.97], [23.88, 37.95], [23.9468, 37.9356]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "headsigns": "", "mode": "Bus", "route_color": "#1976D2", "route_id": "B1", "route_long_name": "Centre - Airport", "route_short_name": "1", "route_text_color": "#FFFFFF", "route_type": 3, "shape_source": "shapes.txt"}, "type": "Feature"}], "type": "FeatureCollection"});
+
+        
+    
+            geo_json_983cfdb64c146e5a2f019a0c4d2437a5.bindTooltip(
+                `<div>
+                     <b>1</b> Centre - Airport
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            geo_json_983cfdb64c146e5a2f019a0c4d2437a5.addTo(feature_group_1dbb70d7e62e5da003f2ce45cd72b446);
+        
+    
+            feature_group_1dbb70d7e62e5da003f2ce45cd72b446.addTo(map_2ea645f9df5d15175dadbb4e46a1e501);
+        
+    
+            var feature_group_2d51cac7fe0f94fbe0f9b82ba2abf729 = L.featureGroup(
+                {
+}
+            );
+        
+    
+        function geo_json_93f4d4ece3964df07774b34d949f2e16_styler(feature) {
+            switch(feature.properties.route_id) {
+                default:
+                    return {"color": "#D32F2F", "opacity": 0.85, "weight": 3};
+            }
+        }
+
+        function geo_json_93f4d4ece3964df07774b34d949f2e16_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_93f4d4ece3964df07774b34d949f2e16 = L.geoJson(null, {
+                onEachFeature: geo_json_93f4d4ece3964df07774b34d949f2e16_onEachFeature,
+            
+                style: geo_json_93f4d4ece3964df07774b34d949f2e16_styler,
+            ...{
+}
+        });
+
+        function geo_json_93f4d4ece3964df07774b34d949f2e16_add (data) {
+            geo_json_93f4d4ece3964df07774b34d949f2e16
+                .addData(data);
+        }
+            geo_json_93f4d4ece3964df07774b34d949f2e16_add({"features": [{"geometry": {"coordinates": [[23.7348, 37.9755], [23.7338, 37.9876], [23.7411, 37.9981]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "headsigns": "", "mode": "Metro", "route_color": "#D32F2F", "route_id": "M1", "route_long_name": "Red Line", "route_short_name": "M1", "route_text_color": "#FFFFFF", "route_type": 1, "shape_source": "stop_sequence"}, "type": "Feature"}], "type": "FeatureCollection"});
+
+        
+    
+            geo_json_93f4d4ece3964df07774b34d949f2e16.bindTooltip(
+                `<div>
+                     <b>M1</b> Red Line
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            geo_json_93f4d4ece3964df07774b34d949f2e16.addTo(feature_group_2d51cac7fe0f94fbe0f9b82ba2abf729);
+        
+    
+            feature_group_2d51cac7fe0f94fbe0f9b82ba2abf729.addTo(map_2ea645f9df5d15175dadbb4e46a1e501);
+        
+    
+            var feature_group_8cb02aa2287cef86baf516fa42f2f1f7 = L.featureGroup(
+                {
+}
+            );
+        
+    
+        function geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65_styler(feature) {
+            switch(feature.properties.route_id) {
+                default:
+                    return {"color": "#E91E63", "opacity": 0.85, "weight": 3};
+            }
+        }
+
+        function geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65 = L.geoJson(null, {
+                onEachFeature: geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65_onEachFeature,
+            
+                style: geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65_styler,
+            ...{
+}
+        });
+
+        function geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65_add (data) {
+            geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65
+                .addData(data);
+        }
+            geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65_add({"features": [{"geometry": {"coordinates": [[23.71, 37.93], [23.725, 37.925]], "type": "LineString"}, "properties": {"agency_id": "DEMO", "agency_name": "Demo Transit", "headsigns": "", "mode": "Tram", "route_color": "#E91E63", "route_id": "T1", "route_long_name": "Coastal Tram", "route_short_name": "T", "route_text_color": "#FFFFFF", "route_type": 0, "shape_source": "shapes.txt"}, "type": "Feature"}], "type": "FeatureCollection"});
+
+        
+    
+            geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65.bindTooltip(
+                `<div>
+                     <b>T</b> Coastal Tram
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            geo_json_25e4c7334ffe1ddeaa1b8c9bccb45f65.addTo(feature_group_8cb02aa2287cef86baf516fa42f2f1f7);
+        
+    
+            feature_group_8cb02aa2287cef86baf516fa42f2f1f7.addTo(map_2ea645f9df5d15175dadbb4e46a1e501);
+        
+    
+            var feature_group_79a09225b91056595eb53569d728b855 = L.featureGroup(
+                {
+}
+            );
+        
+    
+            var marker_cluster_2c11e8069d5e070de615f083337f176d = L.markerClusterGroup(
+                {
+  "disableClusteringAtZoom": 15,
+}
+            );
+        
+    
+            var circle_marker_60f01d22a15b910f573343ab125faf37 = L.circleMarker(
+                [37.9755, 23.7348],
+                {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
+            ).addTo(marker_cluster_2c11e8069d5e070de615f083337f176d);
+        
+    
+            circle_marker_60f01d22a15b910f573343ab125faf37.bindTooltip(
+                `<div>
+                     Centre
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_a3d9197c73ca496f855283931d3157fe = L.circleMarker(
+                [37.9876, 23.7338],
+                {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
+            ).addTo(marker_cluster_2c11e8069d5e070de615f083337f176d);
+        
+    
+            circle_marker_a3d9197c73ca496f855283931d3157fe.bindTooltip(
+                `<div>
+                     Museum
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_305f3164116679e881dbac3da5c1622c = L.circleMarker(
+                [37.9981, 23.7411],
+                {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
+            ).addTo(marker_cluster_2c11e8069d5e070de615f083337f176d);
+        
+    
+            circle_marker_305f3164116679e881dbac3da5c1622c.bindTooltip(
+                `<div>
+                     University
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_0730a1c954fefaea6723a090563dd682 = L.circleMarker(
+                [37.9356, 23.9468],
+                {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
+            ).addTo(marker_cluster_2c11e8069d5e070de615f083337f176d);
+        
+    
+            circle_marker_0730a1c954fefaea6723a090563dd682.bindTooltip(
+                `<div>
+                     Airport
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_d753cee4badbd9319a0ab1f188da4b7e = L.circleMarker(
+                [37.93, 23.71],
+                {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
+            ).addTo(marker_cluster_2c11e8069d5e070de615f083337f176d);
+        
+    
+            circle_marker_d753cee4badbd9319a0ab1f188da4b7e.bindTooltip(
+                `<div>
+                     Beach
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var circle_marker_c690e28e8f489fe9f11ad93d062cf63f = L.circleMarker(
+                [37.925, 23.725],
+                {"bubblingMouseEvents": true, "color": "#444", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff", "fillOpacity": 0.9, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 3, "stroke": true, "weight": 1}
+            ).addTo(marker_cluster_2c11e8069d5e070de615f083337f176d);
+        
+    
+            circle_marker_c690e28e8f489fe9f11ad93d062cf63f.bindTooltip(
+                `<div>
+                     Marina
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            marker_cluster_2c11e8069d5e070de615f083337f176d.addTo(feature_group_79a09225b91056595eb53569d728b855);
+        
+    
+            var layer_control_7ee0455771db4e86849c4116352187df_layers = {
+                base_layers : {
+                    "cartodbpositron" : tile_layer_a4439edaaa71c3fd676d3eece2689def,
+                },
+                overlays :  {
+                    "Bus (1)" : feature_group_1dbb70d7e62e5da003f2ce45cd72b446,
+                    "Metro (1)" : feature_group_2d51cac7fe0f94fbe0f9b82ba2abf729,
+                    "Tram (1)" : feature_group_8cb02aa2287cef86baf516fa42f2f1f7,
+                    "Stops (6)" : feature_group_79a09225b91056595eb53569d728b855,
+                },
+            };
+            let layer_control_7ee0455771db4e86849c4116352187df = L.control.layers(
+                layer_control_7ee0455771db4e86849c4116352187df_layers.base_layers,
+                layer_control_7ee0455771db4e86849c4116352187df_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": false,
+  "autoZIndex": true,
+}
+            ).addTo(map_2ea645f9df5d15175dadbb4e46a1e501);
+
+        
+    
+            var marker_dc71ee9855e33d5a0dcd7cbccbc65e62 = L.marker(
+                [37.9981, 23.9468],
+                {
+}
+            ).addTo(map_2ea645f9df5d15175dadbb4e46a1e501);
+        
+    
+            var div_icon_bbc21c1b4615960293eff6aeb12192dc = L.divIcon({
+  "html": "\u003cdiv style=\"background:rgba(255,255,255,.9);padding:4px 8px;border-radius:4px;font:12px/1.4 system-ui;border:1px solid #ddd\"\u003eDemo feed\u003c/div\u003e",
+  "className": "empty",
+});
+        
+    
+                marker_dc71ee9855e33d5a0dcd7cbccbc65e62.setIcon(div_icon_bbc21c1b4615960293eff6aeb12192dc);
+            
+</script>
+</html>
