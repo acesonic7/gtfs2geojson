@@ -12,7 +12,7 @@ def _parse_bbox(s: str) -> tuple[float, float, float, float]:
     parts = [float(x) for x in s.split(",")]
     if len(parts) != 4:
         raise argparse.ArgumentTypeError("bbox must be 'west,south,east,north'")
-    return tuple(parts)  # type: ignore[return-value]
+    return parts[0], parts[1], parts[2], parts[3]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -36,6 +36,9 @@ def main(argv: list[str] | None = None) -> int:
                    help="Skip emitting stop point features")
     p.add_argument("--no-reconstruct", action="store_true",
                    help="Do not reconstruct missing route shapes from stop sequences")
+    p.add_argument("--keep-orphan-stops", action="store_true",
+                   help="Keep stop features even when no kept trip touches them "
+                        "(default: drop orphans)")
     p.add_argument("--title", default=None,
                    help="Title shown in the preview map (defaults to source filename)")
 
@@ -52,6 +55,7 @@ def main(argv: list[str] | None = None) -> int:
         bbox=args.bbox,
         include_stops=not args.no_stops,
         reconstruct_missing_shapes=not args.no_reconstruct,
+        keep_orphan_stops=args.keep_orphan_stops,
     )
 
     n_routes = sum(1 for f in geojson["features"] if f["geometry"]["type"] != "Point")

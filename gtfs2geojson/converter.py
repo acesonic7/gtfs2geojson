@@ -4,11 +4,12 @@ from __future__ import annotations
 import csv
 import io
 import json
-import os
+import math
+import sys
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Iterator
 
 # GTFS route_type → (human label, default hex colour)
 # Covers basic + extended route types (Hierarchical Vehicle Type / HVT).
@@ -87,6 +88,29 @@ def _in_bbox(lon: float, lat: float, bbox: tuple[float, float, float, float] | N
     return w <= lon <= e and s <= lat <= n
 
 
+_EARTH_RADIUS_KM = 6371.0088
+
+
+def _haversine_km(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
+    """Great-circle distance between two lon/lat points, in kilometres."""
+    rlat1 = math.radians(lat1)
+    rlat2 = math.radians(lat2)
+    dlat = rlat2 - rlat1
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2) ** 2 + math.cos(rlat1) * math.cos(rlat2) * math.sin(dlon / 2) ** 2
+    return 2 * _EARTH_RADIUS_KM * math.asin(math.sqrt(a))
+
+
+def _line_length_km(coords: list[list[float]]) -> float:
+    """Sum of haversine distances between consecutive [lon, lat] points."""
+    total = 0.0
+    for i in range(1, len(coords)):
+        x1, y1 = coords[i - 1]
+        x2, y2 = coords[i]
+        total += _haversine_km(x1, y1, x2, y2)
+    return total
+
+
 def convert(
     source: str | Path,
     *,
@@ -95,11 +119,13 @@ def convert(
     bbox: tuple[float, float, float, float] | None = None,
     include_stops: bool = True,
     reconstruct_missing_shapes: bool = True,
+    keep_orphan_stops: bool = False,
 ) -> dict:
     """Convert a GTFS feed (zip file or directory) to a GeoJSON FeatureCollection.
 
     Routes become MultiLineString features (one per route, all shape variants merged).
-    Stops become Point features with a feature_type='stop' tag.
+    Stops become Point features with ``feature_type='stop'`` and the list of
+    ``route_ids``/``modes`` that serve them.
 
     Parameters
     ----------
@@ -110,12 +136,21 @@ def convert(
     include_stops : whether to emit stop features.
     reconstruct_missing_shapes : if a route has no shapes.txt entry, build polylines
         from its stop_times sequence as a fallback.
+    keep_orphan_stops : if True, emit stop features even when no kept trip touches
+        them. Defaults to False (orphan stops are dropped). Has no effect when
+        ``stop_times.txt`` is missing — in that case all stops are kept.
     """
     mode_filter = {m.lower() for m in modes} if modes else None
     agency_filter = set(agencies) if agencies else None
 
     # ── Routes ────────────────────────────────────────────────────────────
     routes_raw = _read_csv(source, "routes.txt")
+    if not routes_raw:
+        print(
+            "warning: no routes found in routes.txt (file missing or empty); "
+            "output will contain no route features",
+            file=sys.stderr,
+        )
     routes: dict[str, dict] = {}
     for r in routes_raw:
         try:
@@ -156,15 +191,19 @@ def convert(
     for sid in shapes_by_id:
         shapes_by_id[sid].sort()
 
-    # ── Trips → route↔shape map + headsigns ───────────────────────────────
+    # ── Trips → route↔shape map + headsigns + per-route trip set ─────────
     route_shapes: dict[str, set[str]] = defaultdict(set)
     route_headsigns: dict[str, set[str]] = defaultdict(set)
+    route_trips: dict[str, set[str]] = defaultdict(set)
     trip_to_route: dict[str, str] = {}
     for t in _read_csv(source, "trips.txt"):
         rid = t.get("route_id", "")
         if rid not in routes:
             continue
-        trip_to_route[t["trip_id"]] = rid
+        tid = t.get("trip_id", "")
+        if tid:
+            trip_to_route[tid] = rid
+            route_trips[rid].add(tid)
         sid = t.get("shape_id", "")
         if sid:
             route_shapes[rid].add(sid)
@@ -190,28 +229,44 @@ def convert(
             "lon": lon,
         }
 
+    # ── Single pass over stop_times.txt ──────────────────────────────────
+    # Builds, in one walk:
+    #   * trip_stop_seq    — ordered (seq, stop_id) per trip, used for reconstruction
+    #   * route_stop_set   — distinct stop_ids touched by each route (n_stops stat)
+    #   * stop_to_routes   — reverse index: which routes serve each stop
+    #
+    # Skipping this pass entirely is only valid when no consumer needs it; today
+    # at least one of (stats / stops carry routes / reconstruction) always does.
+    trip_stop_seq: dict[str, list[tuple[int, str]]] = defaultdict(list)
+    route_stop_set: dict[str, set[str]] = defaultdict(set)
+    stop_to_routes: dict[str, set[str]] = defaultdict(set)
+    saw_any_stop_time = False
+    for st in _read_csv(source, "stop_times.txt"):
+        saw_any_stop_time = True
+        tid = st.get("trip_id", "")
+        rid = trip_to_route.get(tid)
+        if rid is None:
+            continue
+        sid = st.get("stop_id", "")
+        if sid:
+            route_stop_set[rid].add(sid)
+            stop_to_routes[sid].add(rid)
+        try:
+            seq = int(st["stop_sequence"])
+        except (KeyError, ValueError):
+            continue
+        if sid:
+            trip_stop_seq[tid].append((seq, sid))
+
     # ── Optional shape reconstruction from stop_times ────────────────────
     reconstructed: dict[str, list[tuple[float, float]]] = {}
-    if reconstruct_missing_shapes:
+    if reconstruct_missing_shapes and trip_stop_seq:
         routes_missing = {rid for rid in routes if not route_shapes.get(rid)}
         if routes_missing:
-            # Build trip → ordered list of stop_ids
-            trip_stop_seq: dict[str, list[tuple[int, str]]] = defaultdict(list)
-            for st in _read_csv(source, "stop_times.txt"):
-                tid = st.get("trip_id", "")
-                rid = trip_to_route.get(tid)
-                if rid not in routes_missing:
-                    continue
-                try:
-                    seq = int(st["stop_sequence"])
-                except (KeyError, ValueError):
-                    continue
-                trip_stop_seq[tid].append((seq, st["stop_id"]))
-            # Pick one representative trip per route (longest stop sequence)
             best_trip: dict[str, str] = {}
             for tid, seq in trip_stop_seq.items():
                 rid = trip_to_route.get(tid)
-                if rid is None:
+                if rid not in routes_missing:
                     continue
                 if rid not in best_trip or len(seq) > len(trip_stop_seq[best_trip[rid]]):
                     best_trip[rid] = tid
@@ -235,14 +290,21 @@ def convert(
                 line = [[lon, lat] for _, lat, lon in pts]
                 if bbox is None or any(_in_bbox(x, y, bbox) for x, y in line):
                     lines.append(line)
+        used_reconstruction = False
         if not lines and rid in reconstructed:
             lines.append([[x, y] for x, y in reconstructed[rid]])
+            used_reconstruction = True
         if not lines:
             continue
+        length_km = sum(_line_length_km(line) for line in lines)
         props = dict(info)
+        props["feature_type"] = "route"
         props["agency_name"] = agency_name_by_id.get(info["agency_id"], "")
         props["headsigns"] = " | ".join(sorted(route_headsigns.get(rid, []))[:6])
-        props["shape_source"] = "shapes.txt" if rid not in reconstructed or route_shapes.get(rid) else "stop_sequence"
+        props["shape_source"] = "stop_sequence" if used_reconstruction else "shapes.txt"
+        props["n_trips"] = len(route_trips.get(rid, ()))
+        props["n_stops"] = len(route_stop_set.get(rid, ()))
+        props["length_km"] = round(length_km, 3)
         features.append({
             "type": "Feature",
             "properties": props,
@@ -253,7 +315,16 @@ def convert(
         })
 
     if include_stops:
+        # If stop_times.txt was missing/empty, every stop would look orphan;
+        # fall back to keeping all stops so the user gets *something* useful.
+        keep_all = keep_orphan_stops or not saw_any_stop_time
+        dropped_orphans = 0
         for sid, s in stops.items():
+            stop_routes = sorted(stop_to_routes.get(sid, ()))
+            if not stop_routes and not keep_all:
+                dropped_orphans += 1
+                continue
+            stop_modes = sorted({routes[r]["mode"] for r in stop_routes if r in routes})
             features.append({
                 "type": "Feature",
                 "properties": {
@@ -261,9 +332,17 @@ def convert(
                     "stop_id": s["stop_id"],
                     "stop_name": s["stop_name"],
                     "stop_code": s["stop_code"],
+                    "route_ids": stop_routes,
+                    "modes": stop_modes,
                 },
                 "geometry": {"type": "Point", "coordinates": [s["lon"], s["lat"]]},
             })
+        if dropped_orphans:
+            print(
+                f"info: dropped {dropped_orphans} orphan stop(s) not served by any "
+                "kept trip (use --keep-orphan-stops or keep_orphan_stops=True to retain)",
+                file=sys.stderr,
+            )
 
     return {"type": "FeatureCollection", "features": features}
 

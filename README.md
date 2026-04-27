@@ -79,15 +79,30 @@ Each route feature carries:
 
 | Property | Description |
 |---|---|
+| `feature_type` | always `"route"` |
 | `route_id`, `route_short_name`, `route_long_name` | from `routes.txt` |
 | `route_type` | original GTFS integer |
 | `mode` | human label (`Bus`, `Metro`, `Tram`, `Ferry`, …) |
 | `route_color`, `route_text_color` | hex strings, with mode-based defaults |
 | `agency_id`, `agency_name` | joined from `agency.txt` |
-| `headsigns` | up to 6 distinct headsigns concatenated with `|` |
+| `headsigns` | up to 6 distinct headsigns concatenated with `\|` |
 | `shape_source` | `"shapes.txt"` or `"stop_sequence"` (reconstructed) |
+| `n_trips` | number of trips serving this route |
+| `n_stops` | number of distinct stops touched by any trip on this route |
+| `length_km` | total network length, sum of all shape variants (haversine, km) |
 
-Stop features carry `feature_type: "stop"`, `stop_id`, `stop_name`, `stop_code`.
+Stop features carry:
+
+| Property | Description |
+|---|---|
+| `feature_type` | always `"stop"` |
+| `stop_id`, `stop_name`, `stop_code` | from `stops.txt` |
+| `route_ids` | sorted list of routes serving this stop |
+| `modes` | sorted list of distinct modes among those routes |
+
+By default, stops not served by any kept trip are dropped — pass `--keep-orphan-stops`
+(CLI) or `keep_orphan_stops=True` (Python) to retain them. If `stop_times.txt` is
+absent, all stops are kept regardless.
 
 ## Why?
 
